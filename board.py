@@ -86,6 +86,10 @@ def parse_move_file():
         team = 2
     place_piece(letter_to_int(move[1]), int(move[2]),team)
 
-create_board()
-wait_for_go_file()
-print_board()
+#Main method 
+def main():
+    create_board()
+    wait_for_go_file()
+    print_board()
+
+main()
