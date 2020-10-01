@@ -30,6 +30,7 @@ def create_board():
 
 #Prints out the values of every space of the board in a easier to read format for any testing/debugging needs
 def print_board():
+    print("Board is:")
     for row in board:
         for elem in row:
             print(elem.value, end=', ')
@@ -100,9 +101,17 @@ def parse_move_file():
 #Generates a random move and places
 def generate_and_place_random(team):
     x = random.randint(0,14)
-    y = random.randint(0,14)
+    y = random.randint(1,15)
     place_piece(x,y,team)
-    return (x,y)
+    x = int_to_letter(x)
+
+    with open('move_file','w') as mf: # Writing the move back to file
+        mf.write(groupName+" "+x+" "+str(y))
+    
+
+# Maps an integer to respective columns name, ex. 0 -- > A
+def int_to_letter(col):
+    return chr(col + 65)
 
 #Main method 
 def main():
