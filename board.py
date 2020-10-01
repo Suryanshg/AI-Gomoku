@@ -3,6 +3,7 @@ import os.path
 from os import path
 import sys
 import random
+from time import sleep
 
 #Name of our group, using TEST as a place holder
 groupName = "TEST"
@@ -108,6 +109,11 @@ def generate_and_place_random(team):
     with open('move_file','w') as mf: # Writing the move back to file
         mf.write(groupName+" "+x+" "+str(y))
     
+    print_board()
+    sleep(0.2) # Sleep for 200 ms (Waiting for deletion of our team's .go file)
+    wait_for_go_file()
+
+    
 
 # Maps an integer to respective columns name, ex. 0 -- > A
 def int_to_letter(col):
@@ -117,6 +123,6 @@ def int_to_letter(col):
 def main():
     create_board()
     wait_for_go_file()
-    print_board()
+    
 main()
 
