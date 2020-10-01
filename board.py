@@ -1,6 +1,7 @@
 from enum import Enum
 import os.path
 from os import path
+import sys
 
 #Name of our group, using TEST as a place holder
 groupName = "TEST"
@@ -71,25 +72,33 @@ def wait_for_go_file():
     exists = path.exists(groupName + ".go")
     while(not exists):
         exists = path.exists(groupName + ".go")
-    parse_move_file()
+    endGameFileExists = path.exists('end_game') # Checks if the end game file exists
+    if(endGameFileExists): # if the end game file exist, then game is over
+        print("Game is over!")
+        sys.exit()
+    else:
+        parse_move_file()
 
 #Parses through the move file and places a piece in the corresponding space on the board
 def parse_move_file():
-    exists = path.exists('move_file.txt')
+    exists = path.exists('move_file')
     while(not exists):
-        exists = path.exists('move_file.txt')
-    with open('move_file.txt', 'r') as file:
+        exists = path.exists('move_file')
+    with open('move_file', 'r') as file:
         fileRead = file.read().replace('\n', '')
-    move = fileRead.split()
-    team = 1
-    if move[0] != groupName:
-        team = 2
-    place_piece(letter_to_int(move[1]), int(move[2]),team)
+    if(len(fileRead)>0): # There exists a move already
+        move = fileRead.split()
+        team = 1
+        if move[0] != groupName:
+            team = 2
+        place_piece(letter_to_int(move[1]), int(move[2]),team)
+    else: # No move already exists (our program is Player 1)
+        team = 1
+    
 
 #Main method 
 def main():
     create_board()
     wait_for_go_file()
     print_board()
-
 main()
