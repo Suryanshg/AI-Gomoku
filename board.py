@@ -2,6 +2,7 @@ from enum import Enum
 import os.path
 from os import path
 import sys
+import random
 
 #Name of our group, using TEST as a place holder
 groupName = "TEST"
@@ -93,8 +94,15 @@ def parse_move_file():
             team = 2
         place_piece(letter_to_int(move[1]), int(move[2]),team)
     else: # No move already exists (our program is Player 1)
-        team = 1
-    
+        team = 1  
+    move_to_write = generate_and_place_random(team)
+
+#Generates a random move and places
+def generate_and_place_random(team):
+    x = random.randint(0,14)
+    y = random.randint(0,14)
+    place_piece(x,y,team)
+    return (x,y)
 
 #Main method 
 def main():
@@ -102,3 +110,4 @@ def main():
     wait_for_go_file()
     print_board()
 main()
+
