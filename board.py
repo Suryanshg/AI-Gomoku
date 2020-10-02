@@ -57,7 +57,10 @@ def is_space_on_board(x:int, y:int):
 #If the space is already taken up by a piece then an error is printed and the piece is not placed 
 def place_piece(x:int, y:int, team:int):
     global board
-    if is_space_on_board(x,y) and is_move_valid(x, y):
+    global movesPlayed
+    if not is_move_valid(x,y) and team == 2 and movesPlayed==0:
+        board[y][x] = SpaceState(team)   
+    elif is_space_on_board(x,y) and is_move_valid(x, y):
         board[y][x] = SpaceState(team)
     else:
         print("INVALID MOVE AT: %i,%i" % (x, y))
