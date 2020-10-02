@@ -8,6 +8,9 @@ from time import sleep
 #Name of our group, using TEST as a place holder
 groupName = "TEST"
 
+# Num moves played by TEST
+movesPlayed = 0
+
 #Enum for every state a board space can be in
 #    Empty = Space is empty
 #    Blue = A blue piece (Team 1) is on the space
@@ -49,6 +52,8 @@ def is_space_on_board(x:int, y:int):
 #If the space is already taken up by a piece then an error is printed and the piece is not placed 
 def place_piece(x:int, y:int, team:int):
     global board
+    if(not(is_move_valid(x, y -1)) and movesPlayed==0):
+        board[y-1][x] = SpaceState(team)
     if is_move_valid(x, y-1):
         board[y-1][x] = SpaceState(team)
     else:
@@ -104,13 +109,14 @@ def parse_move_file():
             place_piece(letter_to_int(move[1]), int(move[2]),team)
     else: # No move already exists (our program is Player 1)
         team = 1  
-    move_to_write = generate_and_place_random(team)
+    generate_and_place_random(team)
 
 #Generates a random move and places
 def generate_and_place_random(team):
     x = random.randint(0,14)
     y = random.randint(1,15)
     place_piece(x,y,team)
+    movesPlayed+=1
     x = int_to_letter(x)
 
     with open('move_file','w') as mf: # Writing the move back to file
