@@ -117,7 +117,7 @@ def generate_and_place_random(team):
         mf.write(groupName+" "+x+" "+str(y))
     
     print_board()
-    sleep(0.2) # Sleep for 200 ms (Waiting for deletion of our team's .go file)
+    sleep(0.5) # Sleep for 500 ms (Waiting for deletion of our team's .go file)
     wait_for_go_file()
 
 # Maps an integer to respective columns name, ex. 0 -- > A
