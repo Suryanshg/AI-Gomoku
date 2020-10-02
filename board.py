@@ -117,7 +117,7 @@ def parse_move_file():
             ourTeam = 2
             oppTeam = 1
 
-        place_piece(letter_to_int(move[1]), int(move[2]-1),oppTeam)
+        place_piece(letter_to_int(move[1]), int(move[2])-1,oppTeam)
     # else: # No move already exists (our program is Player 1)  
     generate_and_place_random(ourTeam)
 
