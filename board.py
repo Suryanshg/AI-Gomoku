@@ -24,6 +24,9 @@ boardSize = 15
 #The game board is stored as a 2D array of SpaceStates 
 board = []
 
+#Number used for converting chars to ints and vice versa
+charOffset = 97
+
 #Fills the board with empty spaces 
 def create_board():
     global board
@@ -49,8 +52,8 @@ def is_space_on_board(x:int, y:int):
 #If the space is already taken up by a piece then an error is printed and the piece is not placed 
 def place_piece(x:int, y:int, team:int):
     global board
-    if is_move_valid(x, y-1):
-        board[y-1][x] = SpaceState(team)
+    if is_space_on_board(x,y) and is_move_valid(x, y):
+        board[y][x] = SpaceState(team)
     else:
         print("INVALID MOVE AT: %i,%i" % (x, y))
 
@@ -72,7 +75,7 @@ def test():
 #   i.e: A -> 0
 def letter_to_int(letter):
     letter.lower()
-    return ord(letter) - 65
+    return ord(letter) - charOffset
 
 #Loop that waits for our teams .go file to appear in the current directory
 def wait_for_go_file():
@@ -86,8 +89,16 @@ def wait_for_go_file():
     else:
         parse_move_file()
 
+#Delete the .go file for our team
+def delete_go_file():
+    exists = path.exists(groupName + ".go")
+    while(not exists):
+        exists = path.exists(groupName + ".go")
+    os.remove(groupName + ".go")
+
 #Parses through the move file and places a piece in the corresponding space on the board
 def parse_move_file():
+    team = 1
     exists = path.exists('move_file')
     while(not exists):
         exists = path.exists('move_file')
@@ -95,34 +106,36 @@ def parse_move_file():
         fileRead = file.read().replace('\n', '')
     if(len(fileRead)>0): # There exists a move already
         move = fileRead.split()
-        team = 1
+        print(move[0])
         if move[0] != groupName:
             team = 2
         
-        #Checks to make sure that the move from the move_file is a valid spot on the board
-        if is_space_on_board(move[1],move[2]):
-            place_piece(letter_to_int(move[1]), int(move[2]),team)
-    else: # No move already exists (our program is Player 1)
-        team = 1  
-    move_to_write = generate_and_place_random(team)
+        place_piece(letter_to_int(move[1]), int(move[2])-1,team)
+    team = 1
+    generate_and_place_random(team)
 
 #Generates a random move and places
 def generate_and_place_random(team):
     x = random.randint(0,14)
-    y = random.randint(1,15)
+    y = random.randint(0,14)
+    while not is_move_valid(x, y):
+        x = random.randint(0,14)
+        y = random.randint(0,14)
     place_piece(x,y,team)
     x = int_to_letter(x)
+    y = y + 1
 
     with open('move_file','w') as mf: # Writing the move back to file
         mf.write(groupName+" "+x+" "+str(y))
     
     print_board()
+    delete_go_file()
     sleep(0.5) # Sleep for 500 ms (Waiting for deletion of our team's .go file)
     wait_for_go_file()
 
 # Maps an integer to respective columns name, ex. 0 -- > A
 def int_to_letter(col):
-    return chr(col + 65)
+    return chr(col + charOffset)
 
 #Main method 
 def main():
