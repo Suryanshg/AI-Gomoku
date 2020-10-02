@@ -8,6 +8,11 @@ from time import sleep
 #Name of our group, using TEST as a place holder
 groupName = "TEST"
 
+# Num moves played by TEST
+movesPlayed = 0
+
+ourTeam = 1
+
 #Enum for every state a board space can be in
 #    Empty = Space is empty
 #    Blue = A blue piece (Team 1) is on the space
@@ -84,7 +89,7 @@ def wait_for_go_file():
         exists = path.exists(groupName + ".go")
     endGameFileExists = path.exists('end_game') # Checks if the end game file exists
     if(endGameFileExists): # if the end game file exist, then game is over
-        print("Game is over!")
+        print("Game is over! Moves played by TEST are: "+str(movesPlayed))
         sys.exit()
     else:
         parse_move_file()
@@ -98,7 +103,7 @@ def delete_go_file():
 
 #Parses through the move file and places a piece in the corresponding space on the board
 def parse_move_file():
-    team = 1
+    global ourTeam
     exists = path.exists('move_file')
     while(not exists):
         exists = path.exists('move_file')
@@ -106,22 +111,26 @@ def parse_move_file():
         fileRead = file.read().replace('\n', '')
     if(len(fileRead)>0): # There exists a move already
         move = fileRead.split()
-        print(move[0])
-        if move[0] != groupName:
-            team = 2
         
-        place_piece(letter_to_int(move[1]), int(move[2])-1,team)
-    team = 1
-    generate_and_place_random(team)
+        oppTeam = 2
+        if move[0] != groupName:
+            ourTeam = 2
+            oppTeam = 1
+
+        place_piece(letter_to_int(move[1]), int(move[2]-1),oppTeam)
+    # else: # No move already exists (our program is Player 1)  
+    generate_and_place_random(ourTeam)
 
 #Generates a random move and places
-def generate_and_place_random(team):
+def generate_and_place_random(ourTeam):
     x = random.randint(0,14)
     y = random.randint(0,14)
     while not is_move_valid(x, y):
         x = random.randint(0,14)
         y = random.randint(0,14)
     place_piece(x,y,team)
+    global movesPlayed
+    movesPlayed+=1
     x = int_to_letter(x)
     y = y + 1
 
@@ -131,6 +140,8 @@ def generate_and_place_random(team):
     print_board()
     delete_go_file()
     sleep(0.5) # Sleep for 500 ms (Waiting for deletion of our team's .go file)
+    # if(movesPlayed==1):
+    #     sys.exit()
     wait_for_go_file()
 
 # Maps an integer to respective columns name, ex. 0 -- > A
