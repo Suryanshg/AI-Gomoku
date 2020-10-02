@@ -43,7 +43,7 @@ def is_move_valid(x:int, y:int):
 
 # returns if the specified space is actually oon the board
 def is_space_on_board(x:int, y:int):
-   return (x >= boardSize and x < boardSize) and (y >= boardSize and y < boardSize)
+   return (x >= 0 and x < boardSize) and (y >= 0 and y < boardSize)
 
 #Place a team's piece at the specified x and y coordinates
 #If the space is already taken up by a piece then an error is printed and the piece is not placed 
