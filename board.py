@@ -128,7 +128,7 @@ def generate_and_place_random(ourTeam):
     while not is_move_valid(x, y):
         x = random.randint(0,14)
         y = random.randint(0,14)
-    place_piece(x,y,team)
+    place_piece(x,y,ourTeam)
     global movesPlayed
     movesPlayed+=1
     x = int_to_letter(x)
