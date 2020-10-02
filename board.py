@@ -41,6 +41,10 @@ def print_board():
 def is_move_valid(x:int, y:int):
     return board[y][x] == SpaceState.EMPTY
 
+# returns if the specified space is actually oon the board
+def is_space_on_board(x:int, y:int):
+   return (x >= boardSize and x < boardSize) and (y >= boardSize and y < boardSize)
+
 #Place a team's piece at the specified x and y coordinates
 #If the space is already taken up by a piece then an error is printed and the piece is not placed 
 def place_piece(x:int, y:int, team:int):
@@ -94,7 +98,10 @@ def parse_move_file():
         team = 1
         if move[0] != groupName:
             team = 2
-        place_piece(letter_to_int(move[1]), int(move[2]),team)
+        
+        #Checks to make sure that the move from the move_file is a valid spot on the board
+        if is_space_on_board(move[1],move[2]):
+            place_piece(letter_to_int(move[1]), int(move[2]),team)
     else: # No move already exists (our program is Player 1)
         team = 1  
     move_to_write = generate_and_place_random(team)
@@ -112,8 +119,6 @@ def generate_and_place_random(team):
     print_board()
     sleep(0.2) # Sleep for 200 ms (Waiting for deletion of our team's .go file)
     wait_for_go_file()
-
-    
 
 # Maps an integer to respective columns name, ex. 0 -- > A
 def int_to_letter(col):
