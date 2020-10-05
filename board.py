@@ -152,15 +152,15 @@ def int_to_letter(col):
     return chr(col + charOffset)
 
 # Board for testing the Eval function
-test_board = [[2, 0, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0], 
-              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-              [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0], 
+test_board = [[1, 2, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 2, 2], 
+              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0],
+              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0],
+              [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 2, 0], 
+              [0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0], 
+              [0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0], 
+              [0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0], 
               [0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
-              [0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
-              [0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
-              [0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
-              [0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+              [0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
@@ -267,7 +267,7 @@ def col_eval(board, team):
                         open_ends += 1
                 consec += 1
 
-                i = 1           
+                i = 1
 
                 # Lets check for the consecutives after the current piece
                 while True:
@@ -311,6 +311,7 @@ def col_eval(board, team):
                     elif x-j < 0: # Stops at the boundary condition
                         break  
                     j += 1
+
                 
                 if 0 < consec < 5 and open_ends > 0:  # If not the winning condition in a row
                     board_count[consec][open_ends] += 1 # Update the dictionary
@@ -375,5 +376,5 @@ def main():
     
 #main()
 
-test = row_eval(test_board,1)
+test = col_eval(test_board,2)
 print(test)
