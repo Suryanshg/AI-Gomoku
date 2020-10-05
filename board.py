@@ -151,10 +151,138 @@ def generate_and_place_random(ourTeam):
 def int_to_letter(col):
     return chr(col + charOffset)
 
+
+test_board = [[5, 1, 1, 1, 1, 5, 5, 1, 1, 1, 5, 0, 0, 0, 0], 
+              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+              [0, 0, 0, 0, 0, 5, 1, 1, 1, 1, 5, 0, 0, 0, 0], 
+              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+              [0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0], 
+              [0, 0, 5, 1, 1, 1, 5, 2, 2, 0, 0, 0, 0, 0, 0], 
+              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+
+def row_eval(board, team):
+    board_size = 15
+
+    #[count x, count 2x, count 3x, count 4x]
+    board_count = {1:[0,0,0], 2:[0,0,0], 3:[0,0,0], 4:[0,0,0]}
+
+    for y in range(board_size):
+        x = 0      
+        start_ind = 0
+        end_ind = 0        
+        for x in range(board_size):
+            consec = 0
+            open_ends = 0
+            if board[y][x] == team:
+                if board[y][x-1] == 0:
+                    open_ends += 1
+                consec += 1
+                i = 1           
+
+                #after
+                while True:
+                    if x+i < board_size:
+                        if board[y][x+i] == team:
+                            consec += 1
+                        elif board[y][x+i] != team:
+                            if board[y][x+i] == 0:
+                                open_ends += 1
+                            break
+                    elif x+i == board_size:
+                        break  
+                    
+                    i += 1
+                if 0 < consec < 5 and open_ends > 0:
+                    board_count[consec][open_ends] += 1 
+                elif consec == 5:
+                    return 1000000
+                # print(x)
+                # print(board_count)
+
+                consec = 0
+                open_ends = 0
+
+                #before
+                if board[y][x+1] == 0:
+                    open_ends += 1
+                j = 1
+                while True:
+                    consec += 1 # Need to be fixed with a cond
+                    if x-j >= 0:
+                        if board[y][x-j] == team:
+                            consec += 1
+                        elif board[y][x-j] != team:
+                            if board[y][x-j] == 0:
+                                open_ends += 1
+                            break
+                    if x-j < 0:
+                        break  
+                    j += 1
+                
+                if 0 < consec < 5 and open_ends > 0:
+                    board_count[consec][open_ends] += 1 
+                # print(board_count)
+
+            # print("-------------------------------------------")
+    #final row evaluation loop
+
+    print(board_count)
+    row_eval = 0
+
+    for consecs in board_count:
+        for i in range(len(board_count[consecs])):
+            w = assign_weights(consecs, i)
+            row_eval += board_count[consecs][i] * w
+
+    return row_eval
+
+def assign_weights(l, o):
+    w_o = 0 
+    if l == 4:
+        if o == 2:
+            w_o = 26.6
+        elif o == 1:
+            w_o = 13.3
+        elif o == 0:
+            w_o = 0
+    elif l == 3:
+        if o == 2:
+            w_o = 20
+        elif o == 1:
+            w_o = 10
+        elif o == 0:
+            w_o = 0
+    elif l == 2:
+        if o == 2:
+            w_o = 13.3
+        elif o == 1:
+            w_o = 6.6
+        elif o == 0:
+            w_o = 0
+    elif l == 1:
+        if o == 2:
+            w_o = 6.6
+        elif o == 1:
+            w_o = 3.3
+        elif o == 0:
+            w_o = 0
+    return w_o
+
+
 #Main method 
 def main():
     create_board()
     wait_for_go_file()
     
-main()
+#main()
 
+test = row_eval(test_board,1)
+print(test)
