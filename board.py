@@ -64,20 +64,6 @@ def place_piece(x:int, y:int, team:int):
         board[y][x] = SpaceState(team)
     else:
         print("INVALID MOVE AT: %i,%i" % (x, y))
-
-#Tests place_piece() to make sure it places pieces in the correct spots and returns errors when needed
-def placement_test():
-    place_piece(1,1,2)
-    place_piece(2,2,1)
-    place_piece(3,3,2)
-    place_piece(3,3,1)
-    place_piece(3,4,1)
-
-#Test function
-def test():
-    create_board()
-    placement_test()
-    print_board()
     
 #Turns inputted letter into a number corresponding to the boards x coordinate 
 #   i.e: A -> 0
