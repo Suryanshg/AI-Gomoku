@@ -152,15 +152,15 @@ def int_to_letter(col):
     return chr(col + charOffset)
 
 # Board for testing the Eval function
-test_board = [[0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0], 
+test_board = [[2, 0, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0], 
               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
               [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0], 
               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
-              [0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0], 
-              [0, 0, 1, 1, 1, 1, 1, 2, 2, 0, 0, 0, 0, 0, 0], 
+              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+              [0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], 
               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
@@ -182,10 +182,11 @@ def row_eval(board, team):
             consec = 0 # Track of Consecutives in a row
             open_ends = 0 # Track of respective opened space with consecutives
             if board[y][x] == team:
-                if board[y][x-1] == 0: # If empty, means an opened space
-                    open_ends += 1
+                if x > 0: # Check for the boundary conditions
+                    if board[y][x-1] == 0: # If empty, means an opened space
+                        open_ends += 1
                 consec += 1
-                
+
                 i = 1           
 
                 # Lets check for the consecutives after the current piece
@@ -212,9 +213,9 @@ def row_eval(board, team):
                 consec = 0
                 open_ends = 0
 
-                
-                if board[y][x+1] == 0: # If empty, means an opened space
-                    open_ends += 1
+                if x < board_size: # Check for the boundary conditions
+                    if board[y][x+1] == 0: # If empty, means an opened space
+                        open_ends += 1
 
                 j = 1
 
@@ -247,6 +248,9 @@ def row_eval(board, team):
             row_eval += board_count[consecs][i] * w # Calculate the weighted sum
 
     return row_eval
+
+
+
 
 # Assigns weights to different cases of consecutive pieces and opened nodes in them, 
 # l -- The number of consecutive pieces
