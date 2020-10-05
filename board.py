@@ -152,15 +152,15 @@ def int_to_letter(col):
     return chr(col + charOffset)
 
 # Board for testing the Eval function
-test_board = [[2, 0, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0], 
+test_board = [[2, 0, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0], 
               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
               [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0], 
-              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
-              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
-              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
-              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
-              [0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], 
+              [0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+              [0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+              [0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+              [0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+              [0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
@@ -182,9 +182,9 @@ def row_eval(board, team):
             consec = 0 # Track of Consecutives in a row
             open_ends = 0 # Track of respective opened space with consecutives
             if board[y][x] == team:
-                if x > 0: # Check for the boundary conditions
-                    if board[y][x-1] == 0: # If empty, means an opened space
-                        open_ends += 1
+                # if x > 0: # Check for the boundary conditions
+                if board[y][x-1] == 0: # If empty, means an opened space
+                    open_ends += 1
                 consec += 1
 
                 i = 1           
@@ -206,16 +206,16 @@ def row_eval(board, team):
                     board_count[consec][open_ends] += 1 # Update the dictionary
                 elif consec == 5: # If winning condition in a row
                     return 1000000
-                # print(x)
-                # print(board_count)
+                print(x)
+                print(board_count)
 
                 # Resetting the consecutive count and the opened spaces count before going backwards
-                consec = 0
+                consec = 1
                 open_ends = 0
 
-                if x < board_size: # Check for the boundary conditions
-                    if board[y][x+1] == 0: # If empty, means an opened space
-                        open_ends += 1
+                # if x < board_size: # Check for the boundary conditions
+                if board[y][x+1] == 0: # If empty, means an opened space
+                    open_ends += 1
 
                 j = 1
 
@@ -234,12 +234,10 @@ def row_eval(board, team):
                 
                 if 0 < consec < 5 and open_ends > 0:  # If not the winning condition in a row
                     board_count[consec][open_ends] += 1 # Update the dictionary
-            #     print(board_count)
+                print(board_count)
 
-            # print("-------------------------------------------")
-    
+            print("-------------------------------------------")
     # Lets evaluate on the basis of data about consecutive pieces and opened spaces
-   
     print(board_count)
     row_eval = 0.0
     for consecs in board_count:
@@ -248,6 +246,88 @@ def row_eval(board, team):
             row_eval += board_count[consecs][i] * w # Calculate the weighted sum
 
     return row_eval
+
+    # Returns the eval value for columns
+def col_eval(board, team):
+    board_size = 15
+
+    # Dictionary that takes into account [NumOfPieces : [WithZeroOpenedPlaces, WithOneOpenedPlaces, WithTwoOpenedPlaces]]
+    board_count = {1:[0,0,0], 2:[0,0,0], 3:[0,0,0], 4:[0,0,0]}
+
+    for y in range(board_size):
+        # x = 0      
+        # start_ind = 0
+        # end_ind = 0        
+        for x in range(board_size):
+            consec = 0 # Track of Consecutives in a row
+            open_ends = 0 # Track of respective opened space with consecutives
+            if board[x][y] == team:
+                if x > 0: # Check for the boundary conditions
+                    if board[x-1][y] == 0: # If empty, means an opened space
+                        open_ends += 1
+                consec += 1
+
+                i = 1           
+
+                # Lets check for the consecutives after the current piece
+                while True:
+                    if x+i < board_size:
+                        if board[x+i][y] == team: # Increase the consecutives
+                            consec += 1
+                        elif board[x+i][y] != team: # Check for opened spaces and stop
+                            if board[x+i][y] == 0:
+                                open_ends += 1
+                            break
+                    elif x+i == board_size: # Stops at the boundary condition
+                        break  
+                    i += 1
+
+                if 0 < consec < 5 and open_ends > 0: # If not the winning condition in a row
+                    board_count[consec][open_ends] += 1 # Update the dictionary
+                elif consec == 5: # If winning condition in a row
+                    return 1000000
+                # print(x)
+                # print(board_count)
+
+                # Resetting the consecutive count and the opened spaces count before going backwards
+                consec = 0
+                open_ends = 0
+
+                if x < board_size: # Check for the boundary conditions
+                    if board[x+1][y] == 0: # If empty, means an opened space
+                        open_ends += 1
+
+                j = 1
+
+                # Lets check for the consecutives before the current piece
+                while True:
+                    if x-j >= 0:
+                        if board[x-j][y] == team:  # Increase the consecutives
+                            consec += 1
+                        elif board[x-j][y] != team: # Check for opened spaces and stop
+                            if board[x-j][y] == 0:
+                                open_ends += 1
+                            break
+                    elif x-j < 0: # Stops at the boundary condition
+                        break  
+                    j += 1
+                
+                if 0 < consec < 5 and open_ends > 0:  # If not the winning condition in a row
+                    board_count[consec][open_ends] += 1 # Update the dictionary
+            #     print(board_count)
+
+            # print("-------------------------------------------")
+    
+    # Lets evaluate on the basis of data about consecutive pieces and opened spaces
+   
+    print(board_count)
+    col_eval = 0.0
+    for consecs in board_count:
+        for i in range(len(board_count[consecs])):
+            w = assign_weights(consecs, i) # Acquire the respective weights
+            col_eval += board_count[consecs][i] * w # Calculate the weighted sum
+
+    return col_eval
 
 
 
@@ -295,5 +375,5 @@ def main():
     
 #main()
 
-test = row_eval(test_board,2)
+test = row_eval(test_board,1)
 print(test)
