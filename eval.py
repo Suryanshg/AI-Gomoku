@@ -214,8 +214,8 @@ def diag_eval(board, team):
                     board_count[consec][open_ends] += 1 # Update the dictionary
                 elif consec == 5: # If winning condition in a row
                     return 1000000
-                print(x)
-                print(board_count)
+                # print(x)
+                # print(board_count)
 
                 # Resetting the consecutive count and the opened spaces count before going backwards
                 consec = 1
@@ -244,7 +244,7 @@ def diag_eval(board, team):
                     board_count[consec][open_ends] += 1 # Update the dictionary
                 elif consec == 5: # If winning condition in a row
                     return 1000000
-                print(board_count)
+                # print(board_count)
 
     #_--------------------------------------------------------------------------------------------------------------------------
                 consec = 1
@@ -275,7 +275,7 @@ def diag_eval(board, team):
                 elif consec == 5: # If winning condition in a row
                     return 1000000
                 
-                print(board_count)
+                # print(board_count)
 
                 # Resetting the consecutive count and the opened spaces count before going backwards
                 consec = 1
@@ -304,9 +304,9 @@ def diag_eval(board, team):
                     board_count[consec][open_ends] += 1 # Update the dictionary
                 elif consec == 5: # If winning condition in a row
                     return 1000000
-                print(board_count, consec)
+            #     print(board_count, consec)
 
-            print("-------------------------------------------")
+            # print("-------------------------------------------")
     # Lets evaluate on the basis of data about consecutive pieces and opened spaces
     print(board_count)
     diag_eval = 0.0
