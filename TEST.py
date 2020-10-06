@@ -121,6 +121,9 @@ def parse_move_file():
         with open('move_file','w') as mf: # Writing the move back to file
             mf.write(groupName+" "+x+" "+str(y))
         print(groupName+" "+x+" "+str(y))
+        print_board()
+        delete_go_file()
+        wait_for_go_file()
         
 
 #Generates a random move and places
@@ -141,8 +144,6 @@ def generate_and_place_random(ourTeam):
     
     print_board()
     delete_go_file()
-    # if(movesPlayed==1):
-    #     sys.exit()
     wait_for_go_file()
 
 # Maps an integer to respective columns name, ex. 0 -- > A
@@ -214,9 +215,6 @@ def find_best_move(board, team, otherTeam, maxDepth):
                         bestMove[1] = y
                         bestVal = moveVal
     movesPlayed += 1
-    print_board()
-    delete_go_file()
-    wait_for_go_file()
     return bestMove
     
 #Main method 
