@@ -10,11 +10,12 @@ from threading import Thread
 #   A list of children to the current node
 #   A variable that holds the move
 class Node:
-    def __init__(self, utility=0, parent=None, move=(0,0)):
+    def __init__(self, utility=0, parent=None, move=None, boardState=None):
         self.utility = utility
         self.parent = parent  
         self.move = move
         self.children = []
+        self.boardState = boardState
 
     def add_child(self, child):
         self.children.append(child)
@@ -121,4 +122,4 @@ def min_max_test():
     answer = min_max_alpha_beta(parent)
     print(print_children_test(answer.children))
 
-min_max_test()
+#min_max_test()

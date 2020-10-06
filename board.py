@@ -5,6 +5,7 @@ import sys
 import random
 from time import sleep
 from eval import evaluate
+from algorithm import Node
 
 #Name of our group, using TEST as a place holder
 groupName = "TEST"
@@ -138,10 +139,58 @@ def generate_and_place_random(ourTeam):
 def int_to_letter(col):
     return chr(col + charOffset)
 
+#Returns a list of children board from current board and a list of respective moves. A move is [row,col]
+def getChildrenAndMoves(board, team):
+    listOfChildren=[]
+    listOfMoves=[]
+    for i in range(15):
+        for j in range(15):
+            if(board[i][j] == SpaceState.EMPTY): # If the cell is empty, place move
+                board[i][j] = SpaceState(team)
+                listOfChildren.append(board)
+                listOfMoves.append([i,j])
+                board[i][j] = SpaceState.EMPTY # Resetting the board
+    return [listOfChildren, listOfMoves]
+
+# Returns a node
+def getTree(prevTeam, parent, boardState, move, depth):
+    if(prevTeam == 1):
+        team = 2
+    elif(prevTeam == 2):
+        team = 1
+    childrenAndMoves = getChildrenAndMoves(boardState, team)
+    children = childrenAndMoves[0]
+    moves = childrenAndMoves[1]
+    if len(children) == 0: # Reached the end, no more moves
+        return parent
+    elif depth == 2:
+        return parent
+    else: # Create Node
+        node = Node()
+        node.parent = parent
+        node.boardState = boardState
+        node.move = move
+        node.utility = evaluate(node.boardState, team, prevTeam)
+        node.children = getTreeHelper(children, team, node, moves, depth+1)
+        return node
+
+# Returns a list of nodes
+def getTreeHelper(listOfChildren, team, parentNode, listOfMoves, depth):
+    L=[]
+    for i in range(len(listOfChildren)):
+        childBoard = listOfChildren[i]
+        move = listOfMoves[i]
+        L.append(getTree(team, parentNode, childBoard, move, depth))
+    return L
+
 #Main method 
 def main():
     create_board()
     wait_for_go_file()
     
-main()
+#main()
+
+create_board()
+gameTree = getTree(2, None, board, None, 0)
+print("Done!")
 
