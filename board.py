@@ -4,6 +4,7 @@ from os import path
 import sys
 import random
 from time import sleep
+from eval import evaluate
 
 #Name of our group, using TEST as a place holder
 groupName = "TEST"
@@ -142,4 +143,4 @@ def main():
     create_board()
     wait_for_go_file()
     
-main()
+# main()
