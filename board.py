@@ -143,4 +143,5 @@ def main():
     create_board()
     wait_for_go_file()
     
-# main()
+main()
+
