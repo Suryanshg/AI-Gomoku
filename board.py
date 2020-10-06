@@ -152,8 +152,10 @@ def getChildrenAndMoves(board, team):
                 board[i][j] = SpaceState.EMPTY # Resetting the board
     return [listOfChildren, listOfMoves]
 
+MAX_DEPTH = 1
 # Returns a node
 def getTree(prevTeam, parent, boardState, move, depth):
+    global MAX_DEPTH
     if(prevTeam == 1):
         team = 2
     elif(prevTeam == 2):
@@ -163,7 +165,7 @@ def getTree(prevTeam, parent, boardState, move, depth):
     moves = childrenAndMoves[1]
     if len(children) == 0: # Reached the end, no more moves
         return parent
-    elif depth == 2:
+    elif depth == MAX_DEPTH + 1:
         return parent
     else: # Create Node
         node = Node()
