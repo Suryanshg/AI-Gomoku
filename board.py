@@ -114,7 +114,14 @@ def parse_move_file():
     if movesPlayed == 0:  
         generate_and_place_random(ourTeam)
     else:
-        find_best_move(board, ourTeam, oppTeam, MAXDEPTH)
+        bestMove = find_best_move(board, ourTeam, oppTeam, MAXDEPTH)
+        x = int_to_letter(bestMove[1])
+        y = bestMove[0] + 1
+
+        with open('move_file','w') as mf: # Writing the move back to file
+            mf.write(groupName+" "+x+" "+str(y))
+        print(groupName+" "+x+" "+str(y))
+        
 
 #Generates a random move and places
 def generate_and_place_random(ourTeam):
@@ -143,7 +150,7 @@ def int_to_letter(col):
     return chr(col + charOffset)
 
 #Constant variable for limiting depth
-MAXDEPTH = 1
+MAXDEPTH = 2
 
 #Constant variable for storing positive infinity
 INF = float('inf')
@@ -207,6 +214,9 @@ def find_best_move(board, team, otherTeam, maxDepth):
                         bestMove[1] = y
                         bestVal = moveVal
     movesPlayed += 1
+    print_board()
+    delete_go_file()
+    wait_for_go_file()
     return bestMove
     
 #Main method 
