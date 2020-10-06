@@ -1,15 +1,15 @@
 # Board for testing the Eval function
-test_board = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
-              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
-              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
-              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
-              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
-              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
-              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
-              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
-              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+test_board = [[0, 0, 0, 0, 0, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0], 
+              [0, 0, 0, 0, 0, 0, 2, 0, 2, 1, 1, 0, 0, 0, 0],
+              [0, 0, 0, 0, 0, 0, 1, 1, 2, 2, 1, 0, 0, 0, 0],
+              [0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 1, 0, 0, 0], 
+              [0, 0, 0, 0, 0, 0, 1, 2, 2, 0, 0, 2, 0, 0, 0], 
+              [0, 0, 0, 0, 0, 0, 1, 2, 1, 0, 0, 0, 1, 0, 0], 
+              [0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0], 
+              [0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0], 
+              [0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0], 
+              [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0], 
+              [0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0], 
               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
@@ -86,7 +86,7 @@ def row_eval(board, team):
 
             # print("-------------------------------------------")
     # Lets evaluate on the basis of data about consecutive pieces and opened spaces
-    print(board_count)
+    # print(board_count)
     row_eval = 0.0
     for consecs in board_count:
         for i in range(len(board_count[consecs])):
@@ -169,7 +169,7 @@ def col_eval(board, team):
     
     # Lets evaluate on the basis of data about consecutive pieces and opened spaces
    
-    print(board_count)
+    # print(board_count)
     col_eval = 0.0
     for consecs in board_count:
         for i in range(len(board_count[consecs])):
@@ -308,7 +308,7 @@ def diag_eval(board, team):
 
             # print("-------------------------------------------")
     # Lets evaluate on the basis of data about consecutive pieces and opened spaces
-    print(board_count)
+    # print(board_count)
     diag_eval = 0.0
     for consecs in board_count:
         for i in range(len(board_count[consecs])):
@@ -353,8 +353,18 @@ def assign_weights(l, o):
     return w_o
 
 
-test = diag_eval(test_board,1)
-print(test)
+def evaluate(board, team_1, team_2):
+    row_eval_1 = row_eval(board, team_1)
+    col_eval_1 = col_eval(board, team_1)
+    diag_eval_1 = diag_eval(board, team_1)
+    
+    offensive = row_eval_1 + col_eval_1 + diag_eval_1
 
+    row_eval_2 = row_eval(board, team_2)
+    col_eval_2 = col_eval(board, team_2)
+    diag_eval_2 = diag_eval(board, team_2)
+    
+    defensive = row_eval_2 + col_eval_2 + diag_eval_2
 
+    return (offensive-defensive)
 
