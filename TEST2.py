@@ -7,7 +7,7 @@ from time import sleep
 from eval import evaluate
 
 #Name of our group, using TEST as a place holder
-groupName = "TEST"
+groupName = "TEST2"
 
 # Num moves played by TEST
 movesPlayed = 0

@@ -3,6 +3,7 @@ import time
 import sys
 from threading import Thread
 
+
 #A single node in a tree of utility nodes
 #   each node contains:
 #   The utility of the current node
@@ -122,4 +123,3 @@ def min_max_test():
     answer = min_max_alpha_beta(parent)
     print(print_children_test(answer.children))
 
-#min_max_test()

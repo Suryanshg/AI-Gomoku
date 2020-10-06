@@ -63,7 +63,7 @@ def row_eval(board, team):
                 consec = 1
                 open_ends = 0
 
-                if x < board_size: # Check for the boundary conditions
+                if x < board_size-1: # Check for the boundary conditions
                     if board[y][x+1].value == 0: # If empty, means an opened space
                         open_ends += 1
 
@@ -143,7 +143,7 @@ def col_eval(board, team):
                 consec = 1
                 open_ends = 0
 
-                if x < board_size: # Check for the boundary conditions
+                if x < board_size-1: # Check for the boundary conditions
                     if board[x+1][y].value == 0: # If empty, means an opened space
                         open_ends += 1
 
