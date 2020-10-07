@@ -12,7 +12,9 @@ groupName = "TEST"
 # Num moves played by TEST
 movesPlayed = 0
 
+#Variables for storing team turns
 ourTeam = 1
+oppTeam = 2
 
 #Enum for every state a board space can be in
 #    Empty = Space is empty
@@ -50,7 +52,7 @@ def print_board():
 def is_move_valid(x:int, y:int):
     return board[y][x] == SpaceState.EMPTY
 
-# returns if the specified space is actually oon the board
+# returns if the specified space is actually on the board
 def is_space_on_board(x:int, y:int):
    return (x >= 0 and x < boardSize) and (y >= 0 and y < boardSize)
 
@@ -94,8 +96,8 @@ def delete_go_file():
 #Parses through the move file and places a piece in the corresponding space on the board
 def parse_move_file():
     global ourTeam
+    global oppTeam
     global board
-    oppTeam = 2
     exists = path.exists('move_file')
     while(not exists):
         exists = path.exists('move_file')
@@ -103,12 +105,6 @@ def parse_move_file():
         fileRead = file.read().replace('\n', '')
     if(len(fileRead)>0): # There exists a move already
         move = fileRead.split()
-        
-        oppTeam = 2
-        if move[0] != groupName:
-            ourTeam = 2
-            oppTeam = 1
-
         place_piece(letter_to_int(move[1]), int(move[2])-1,oppTeam)
     # else: # No move already exists (our program is Player 1)
     if movesPlayed == 0:  
@@ -117,6 +113,7 @@ def parse_move_file():
         bestMove = find_best_move(board, ourTeam, oppTeam, MAXDEPTH)
         x = int_to_letter(bestMove[1])
         y = bestMove[0] + 1
+        place_piece(bestMove[1],bestMove[0], ourTeam)
 
         with open('move_file','w') as mf: # Writing the move back to file
             mf.write(groupName+" "+x+" "+str(y))
