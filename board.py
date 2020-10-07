@@ -6,7 +6,6 @@ import random
 from time import sleep
 from eval import evaluate
 import time
-import multiprocessing
 
 #Name of our group, using TEST as a place holder
 groupName = "TEST"
@@ -39,6 +38,8 @@ charOffset = 97
 
 lastMoves = [[-1,-1],[-1,-1]]
 
+currentTime = time.time()
+
 #Fills the board with empty spaces 
 def create_board():
     global board
@@ -46,11 +47,12 @@ def create_board():
 
 #Prints out the values of every space of the board in a easier to read format for any testing/debugging needs
 def print_board():
-    print("Board is:")
-    for row in board:
-        for elem in row:
-            print(elem.value, end=', ')
-        print()
+    #print("Board is:")
+    #for row in board:
+        #for elem in row:
+            #print(elem.value, end=', ')
+        #print()
+    pass
 
 #Returns if a piece can be placed on the specified space
 def is_move_valid(x:int, y:int):
@@ -66,7 +68,6 @@ def place_piece(x:int, y:int, team:int):
     global board
     global movesPlayed
     if is_space_on_board(x,y) and is_move_valid(x, y):
-        print(str(x)+","+str(y)+"    "+str(board[y][x])+"    "+str(board[x][y]))
         board[y][x] = SpaceState(team)
         lastMoves[team-1] = [y,x]   
     else:
@@ -103,6 +104,8 @@ def parse_move_file():
     global ourTeam
     global oppTeam
     global board
+    global currentTime
+    currentTime = time.time()
     exists = path.exists('move_file')
     while(not exists):
         exists = path.exists('move_file')
@@ -206,16 +209,15 @@ def min_max_alpha_beta(board, team, otherTeam, depth, maxDepth, isMax, alpha, be
                 break
         return best   
 
-TIMEOUTAMOUNT = 7
-
+TIMEOUTAMOUNT = 8
 
 def find_best_move(board, team, otherTeam, maxDepth):
     global movesPlayed
     bestVal = -INF
     bestMove = [-1,-1] 
     moveSpots = create_moves_list()
-    print(moveSpots)
-    timeout = time.time() + TIMEOUTAMOUNT
+    #print(moveSpots)
+    timeout = currentTime + TIMEOUTAMOUNT
     for x in moveSpots[1]:
         for y in moveSpots[0]:
             if (is_space_on_board(x,y) and is_move_valid(x,y)):
@@ -230,6 +232,7 @@ def find_best_move(board, team, otherTeam, maxDepth):
             if time.time() > timeout:
                 break
         if time.time() > timeout:
+            print("TIMES UP!")
             break
 
     movesPlayed += 1
@@ -240,8 +243,8 @@ def create_moves_list():
     global lastMoves
     listOfSpaces = [[],[]]
     for x in lastMoves:
-        listOfSpaces[0].extend(list(range(x[0]-1, x[0]+1)))
-        listOfSpaces[1].extend(list(range(x[1]-1, x[1]+1)))
+        listOfSpaces[0].extend(list(range(x[0]-2, x[0]+2)))
+        listOfSpaces[1].extend(list(range(x[1]-2, x[1]+2)))
     return listOfSpaces
 
 
