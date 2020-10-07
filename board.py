@@ -35,6 +35,8 @@ board = []
 #Number used for converting chars to ints and vice versa
 charOffset = 97
 
+lastMoves = [[-1,-1],[-1,-1]]
+
 #Fills the board with empty spaces 
 def create_board():
     global board
@@ -61,12 +63,11 @@ def is_space_on_board(x:int, y:int):
 def place_piece(x:int, y:int, team:int):
     global board
     global movesPlayed
-    if not is_move_valid(x,y) and team == 2 and movesPlayed==0:
-        board[y][x] = SpaceState(team)   
-    elif is_space_on_board(x,y) and is_move_valid(x, y):
+    if (not is_move_valid(x,y) and team == 2 and movesPlayed==0) or (is_space_on_board(x,y) and is_move_valid(x, y)):
         board[y][x] = SpaceState(team)
+        lastMoves[team-1] = [y,x]   
     else:
-        print("INVALID MOVE AT: %i,%i" % (x, y))
+        print("INVALID MOVE AT: %i,%i: FOUND%i" % (x, y, (board[y][x]).value))
     
 #Turns inputted letter into a number corresponding to the boards x coordinate 
 #   i.e: A -> 0
@@ -76,6 +77,7 @@ def letter_to_int(letter):
 
 #Loop that waits for our teams .go file to appear in the current directory
 def wait_for_go_file():
+    sleep(.5)
     exists = path.exists(groupName + ".go")
     while(not exists):
         exists = path.exists(groupName + ".go")
@@ -111,16 +113,20 @@ def parse_move_file():
         generate_and_place_random(ourTeam)
     else:
         bestMove = find_best_move(board, ourTeam, oppTeam, MAXDEPTH)
-        x = int_to_letter(bestMove[1])
-        y = bestMove[0] + 1
-        place_piece(bestMove[1],bestMove[0], ourTeam)
+        if bestMove != [-1,-1]:
+            x = int_to_letter(bestMove[1])
+            y = bestMove[0] + 1
+            place_piece(bestMove[1],bestMove[0], ourTeam)
 
-        with open('move_file','w') as mf: # Writing the move back to file
-            mf.write(groupName+" "+x+" "+str(y))
-        print(groupName+" "+x+" "+str(y))
-        print_board()
-        delete_go_file()
-        wait_for_go_file()
+            with open('move_file','w') as mf: # Writing the move back to file
+                mf.write(groupName+" "+x+" "+str(y))
+            print(groupName+" "+x+" "+str(y))
+            print_board()
+            delete_go_file()
+            wait_for_go_file()
+        else:
+            generate_and_place_random(ourTeam)
+
         
 
 #Generates a random move and places
@@ -157,7 +163,7 @@ INF = float('inf')
 FIVEROWPOS = 100000
 FIVEROWNEG = -100000
 
-def min_max_alpha_beta(board, team, otherTeam, depth, maxDepth, isMax, alpha, beta):
+def min_max_alpha_beta(board, team, otherTeam, depth, maxDepth, isMax, alpha, beta,moveSpots):
     bestScore = evaluate(board, team, otherTeam)
 
     if bestScore >= FIVEROWPOS or bestScore <= FIVEROWNEG or depth >= maxDepth:
@@ -169,11 +175,11 @@ def min_max_alpha_beta(board, team, otherTeam, depth, maxDepth, isMax, alpha, be
 
     if isMax:
         best = -INF
-        for x in range(boardSize):
-            for y in range(boardSize):
-                if board[x][y] == SpaceState.EMPTY:
+        for x in moveSpots[1]:
+            for y in moveSpots[0]:
+                if (is_space_on_board(x,y) and is_move_valid(x,y)):
                     board[x][y] = SpaceState(team)
-                    best = max(best,min_max_alpha_beta(board,otherTeam,team,depth+1,maxDepth,not isMax,alpha,beta))
+                    best = max(best,min_max_alpha_beta(board,otherTeam,team,depth+1,maxDepth,not isMax,alpha,beta,moveSpots))
                     alpha = max(alpha, best)
                     board[x][y] = SpaceState.EMPTY
                     if beta <= alpha:
@@ -183,11 +189,11 @@ def min_max_alpha_beta(board, team, otherTeam, depth, maxDepth, isMax, alpha, be
         return best                
     else:        
         best = INF
-        for x in range(boardSize):
-            for y in range(boardSize):
-                if board[x][y] == SpaceState.EMPTY:
+        for x in moveSpots[1]:
+            for y in moveSpots[0]:
+                if (is_space_on_board(x,y) and is_move_valid(x,y)):
                     board[x][y] = SpaceState(team)
-                    best = min(best,min_max_alpha_beta(board,otherTeam,team,depth+1,maxDepth,not isMax,alpha,beta))
+                    best = min(best,min_max_alpha_beta(board,otherTeam,team,depth+1,maxDepth,not isMax,alpha,beta,moveSpots))
                     beta = min(beta, best)
                     board[x][y] = SpaceState.EMPTY
                     if beta <= alpha:
@@ -199,12 +205,14 @@ def min_max_alpha_beta(board, team, otherTeam, depth, maxDepth, isMax, alpha, be
 def find_best_move(board, team, otherTeam, maxDepth):
     global movesPlayed
     bestVal = -INF
-    bestMove = [-1,-1]
-    for x in range(boardSize):
-            for y in range(boardSize):
-                if board[x][y] == SpaceState.EMPTY:
+    bestMove = [-1,-1] 
+    moveSpots = create_moves_list()
+    print(moveSpots)
+    for x in moveSpots[1]:
+            for y in moveSpots[0]:
+                if (is_space_on_board(x,y) and is_move_valid(x,y)):
                     board[x][y] = SpaceState(team)
-                    moveVal = min_max_alpha_beta(board,team,otherTeam,0,maxDepth,False,-INF,INF)
+                    moveVal = min_max_alpha_beta(board,team,otherTeam,0,maxDepth,False,-INF,INF,moveSpots)
                     board[x][y] = SpaceState.EMPTY
 
                     if moveVal > bestVal:
@@ -214,6 +222,17 @@ def find_best_move(board, team, otherTeam, maxDepth):
     movesPlayed += 1
     return bestMove
     
+
+def create_moves_list():
+    global lastMoves
+    listOfSpaces = [[],[]]
+    for x in lastMoves:
+        listOfSpaces[0].extend(list(range(x[0]-2, x[0]+2)))
+        listOfSpaces[1].extend(list(range(x[1]-2, x[1]+2)))
+    return listOfSpaces
+
+
+
 #Main method 
 def main():
     create_board()
