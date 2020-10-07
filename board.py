@@ -206,7 +206,7 @@ def min_max_alpha_beta(board, team, otherTeam, depth, maxDepth, isMax, alpha, be
                 break
         return best   
 
-TIMEOUTAMOUNT = 5
+TIMEOUTAMOUNT = 7
 
 
 def find_best_move(board, team, otherTeam, maxDepth):
@@ -215,7 +215,7 @@ def find_best_move(board, team, otherTeam, maxDepth):
     bestMove = [-1,-1] 
     moveSpots = create_moves_list()
     print(moveSpots)
-
+    timeout = time.time() + TIMEOUTAMOUNT
     for x in moveSpots[1]:
         for y in moveSpots[0]:
             if (is_space_on_board(x,y) and is_move_valid(x,y)):
@@ -227,6 +227,10 @@ def find_best_move(board, team, otherTeam, maxDepth):
                     bestMove[0] = x
                     bestMove[1] = y
                     bestVal = moveVal
+            if time.time() > timeout:
+                break
+        if time.time() > timeout:
+            break
 
     movesPlayed += 1
     return bestMove

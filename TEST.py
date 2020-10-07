@@ -7,7 +7,6 @@ from time import sleep
 from eval import evaluate
 import time
 import multiprocessing
-import itertools
 
 #Name of our group, using TEST as a place holder
 groupName = "TEST"
@@ -67,7 +66,7 @@ def place_piece(x:int, y:int, team:int):
     global board
     global movesPlayed
     if is_space_on_board(x,y) and is_move_valid(x, y):
-       # print(str(x)+","+str(y)+"    "+str(board[y][x])+"    "+str(board[x][y]))
+        print(str(x)+","+str(y)+"    "+str(board[y][x])+"    "+str(board[x][y]))
         board[y][x] = SpaceState(team)
         lastMoves[team-1] = [y,x]   
     else:
@@ -112,7 +111,7 @@ def parse_move_file():
     if(len(fileRead)>0): # There exists a move already
         move = fileRead.split()
         place_piece(letter_to_int(move[1]), int(move[2])-1,oppTeam)
-        #print_board()
+        print_board()
     # else: # No move already exists (our program is Player 1)
     if movesPlayed == 0:  
         generate_and_place_random(ourTeam)
@@ -125,10 +124,9 @@ def parse_move_file():
 
             with open('move_file','w') as mf: # Writing the move back to file
                 mf.write(groupName+" "+x+" "+str(y))
-            #print(groupName+" "+x+" "+str(y))
-            #print_board()
+            print(groupName+" "+x+" "+str(y))
+            print_board()
             delete_go_file()
-            #print(board)
             wait_for_go_file()
         else:
             generate_and_place_random(ourTeam)
@@ -151,7 +149,7 @@ def generate_and_place_random(ourTeam):
     with open('move_file','w') as mf: # Writing the move back to file
         mf.write(groupName+" "+x+" "+str(y))
     
-    #print_board()
+    print_board()
     delete_go_file()
     wait_for_go_file()
 
@@ -208,6 +206,31 @@ def min_max_alpha_beta(board, team, otherTeam, depth, maxDepth, isMax, alpha, be
                 break
         return best   
 
+TIMEOUTAMOUNT = 5
+
+
+def find_best_move(board, team, otherTeam, maxDepth):
+    global movesPlayed
+    bestVal = -INF
+    bestMove = [-1,-1] 
+    moveSpots = create_moves_list()
+    print(moveSpots)
+    for x in moveSpots[1]:
+        for y in moveSpots[0]:
+            if (is_space_on_board(x,y) and is_move_valid(x,y)):
+                board[y][x] = SpaceState(team)
+                moveVal = min_max_alpha_beta(board,team,otherTeam,0,maxDepth,False,-INF,INF,moveSpots)
+                board[y][x] = SpaceState.EMPTY
+
+                if moveVal > bestVal:
+                    bestMove[0] = x
+                    bestMove[1] = y
+                    bestVal = moveVal
+
+    movesPlayed += 1
+    return bestMove
+    
+
 def create_moves_list():
     global lastMoves
     listOfSpaces = [[],[]]
@@ -216,52 +239,6 @@ def create_moves_list():
         listOfSpaces[1].extend(list(range(x[1]-1, x[1]+1)))
     return listOfSpaces
 
-TIMEOUTAMOUNT = 7
-
-bestVal = -INF
-bestMove = [-1,-1] 
-moveSpots = create_moves_list()
-
-def helper(x,y,board,team,otherTeam,maxDepth):
-    print("IN HELPER")
-    if (is_space_on_board(x,y) and is_move_valid(x,y)):
-        global bestVal
-        global bestMove
-        global moveSpots
-        board[y][x] = SpaceState(team)
-        moveVal = min_max_alpha_beta(board,team,otherTeam,0,maxDepth,False,-INF,INF,moveSpots)
-        board[y][x] = SpaceState.EMPTY
-
-        if moveVal > bestVal:
-            bestMove[0] = x
-            bestMove[1] = y
-            bestVal = moveVal
-
-
-def add_args(x,add_what):
-    x.extend(add_what)
-
-
-def find_best_move(board, team, otherTeam, maxDepth):
-    global movesPlayed
-    global bestVal
-    global bestMove
-    global moveSpots
-    
-    bestVal = -INF
-    bestMove = [-1,-1] 
-    moveSpots = create_moves_list()
-    listLength = len(moveSpots)
-    args = list(itertools.product(moveSpots[1],moveSpots[0]))
-    print(args)
-    newArgs = [add_args(x, [board,team,otherTeam,maxDepth]) for x in args]
-    print(newArgs)
-    pool = multiprocessing.Pool()
-    pool.map(helper,newArgs)
-    #print(moveSpots)
-
-    movesPlayed += 1
-    return bestMove
 
 
 #Main method 
