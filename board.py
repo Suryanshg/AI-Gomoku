@@ -36,8 +36,10 @@ board = []
 #Number used for converting chars to ints and vice versa
 charOffset = 97
 
+#Variable that stores the last moves of both the player and the opponent
 lastMoves = [[-1,-1],[-1,-1]]
 
+#Stores the time in which calculations started, updates whenever a move file is parsed
 currentTime = time.time()
 
 #Fills the board with empty spaces 
@@ -134,7 +136,6 @@ def parse_move_file():
         else:
             generate_and_place_random(ourTeam)
 
-        
 
 #Generates a random move and places
 def generate_and_place_random(ourTeam):
@@ -170,7 +171,10 @@ INF = float('inf')
 FIVEROWPOS = 100000
 FIVEROWNEG = -100000
 
-def min_max_alpha_beta(board, team, otherTeam, depth, maxDepth, isMax, alpha, beta,moveSpots):
+#Min Max algorithm with alpha beta pruning
+#Takes in the current state of the board and uses it to calculate a few moves ahead to find out what move is best
+#Depth is limited by MAXDEPTH
+def min_max_alpha_beta(board, team, otherTeam, depth, maxDepth, isMax, alpha, beta, moveSpots):
     bestScore = evaluate(board, team, otherTeam)
 
     if bestScore >= FIVEROWPOS or bestScore <= FIVEROWNEG or depth >= maxDepth:
@@ -209,8 +213,11 @@ def min_max_alpha_beta(board, team, otherTeam, depth, maxDepth, isMax, alpha, be
                 break
         return best   
 
+#Constant for how long the AI can run before timing out
+#   8 = 8 seconds
 TIMEOUTAMOUNT = 8
 
+#Generates moves around the last moves of the player and opponent and determins which is the best to take
 def find_best_move(board, team, otherTeam, maxDepth):
     global movesPlayed
     bestVal = -INF
@@ -238,16 +245,15 @@ def find_best_move(board, team, otherTeam, maxDepth):
     movesPlayed += 1
     return bestMove
     
-
+#Creates a list of spaces around the player's and opponent's last moves for which to generate moves around
 def create_moves_list():
     global lastMoves
     listOfSpaces = [[],[]]
     for x in lastMoves:
         listOfSpaces[0].extend(list(range(x[0]-2, x[0]+2)))
         listOfSpaces[1].extend(list(range(x[1]-2, x[1]+2)))
-    return listOfSpaces
-
-
+    listOfValidSpaces = [[x for x in listOfSpaces[0] if x >= 0 and x < boardSize], [x for x in listOfSpaces[1] if x >= 0 and x < boardSize]]
+    return listOfValidSpaces
 
 #Main method 
 def main():

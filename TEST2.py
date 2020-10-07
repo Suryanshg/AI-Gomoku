@@ -6,7 +6,6 @@ import random
 from time import sleep
 from eval import evaluate
 import time
-import multiprocessing
 
 #Name of our group, using TEST as a place holder
 groupName = "TEST2"
@@ -37,7 +36,11 @@ board = []
 #Number used for converting chars to ints and vice versa
 charOffset = 97
 
+#Variable that stores the last moves of both the player and the opponent
 lastMoves = [[-1,-1],[-1,-1]]
+
+#Stores the time in which calculations started, updates whenever a move file is parsed
+currentTime = time.time()
 
 #Fills the board with empty spaces 
 def create_board():
@@ -46,11 +49,12 @@ def create_board():
 
 #Prints out the values of every space of the board in a easier to read format for any testing/debugging needs
 def print_board():
-    print("Board is:")
-    for row in board:
-        for elem in row:
-            print(elem.value, end=', ')
-        print()
+    #print("Board is:")
+    #for row in board:
+        #for elem in row:
+            #print(elem.value, end=', ')
+        #print()
+    pass
 
 #Returns if a piece can be placed on the specified space
 def is_move_valid(x:int, y:int):
@@ -66,7 +70,6 @@ def place_piece(x:int, y:int, team:int):
     global board
     global movesPlayed
     if is_space_on_board(x,y) and is_move_valid(x, y):
-        print(str(x)+","+str(y)+"    "+str(board[y][x])+"    "+str(board[x][y]))
         board[y][x] = SpaceState(team)
         lastMoves[team-1] = [y,x]   
     else:
@@ -103,6 +106,8 @@ def parse_move_file():
     global ourTeam
     global oppTeam
     global board
+    global currentTime
+    currentTime = time.time()
     exists = path.exists('move_file')
     while(not exists):
         exists = path.exists('move_file')
@@ -131,7 +136,6 @@ def parse_move_file():
         else:
             generate_and_place_random(ourTeam)
 
-        
 
 #Generates a random move and places
 def generate_and_place_random(ourTeam):
@@ -167,7 +171,10 @@ INF = float('inf')
 FIVEROWPOS = 100000
 FIVEROWNEG = -100000
 
-def min_max_alpha_beta(board, team, otherTeam, depth, maxDepth, isMax, alpha, beta,moveSpots):
+#Min Max algorithm with alpha beta pruning
+#Takes in the current state of the board and uses it to calculate a few moves ahead to find out what move is best
+#Depth is limited by MAXDEPTH
+def min_max_alpha_beta(board, team, otherTeam, depth, maxDepth, isMax, alpha, beta, moveSpots):
     bestScore = evaluate(board, team, otherTeam)
 
     if bestScore >= FIVEROWPOS or bestScore <= FIVEROWNEG or depth >= maxDepth:
@@ -206,16 +213,18 @@ def min_max_alpha_beta(board, team, otherTeam, depth, maxDepth, isMax, alpha, be
                 break
         return best   
 
+#Constant for how long the AI can run before timing out
+#   8 = 8 seconds
 TIMEOUTAMOUNT = 8
 
-
+#Generates moves around the last moves of the player and opponent and determins which is the best to take
 def find_best_move(board, team, otherTeam, maxDepth):
     global movesPlayed
     bestVal = -INF
     bestMove = [-1,-1] 
     moveSpots = create_moves_list()
-    print(moveSpots)
-    timeout = time.time() + TIMEOUTAMOUNT
+    #print(moveSpots)
+    timeout = currentTime + TIMEOUTAMOUNT
     for x in moveSpots[1]:
         for y in moveSpots[0]:
             if (is_space_on_board(x,y) and is_move_valid(x,y)):
@@ -230,22 +239,21 @@ def find_best_move(board, team, otherTeam, maxDepth):
             if time.time() > timeout:
                 break
         if time.time() > timeout:
+            print("TIMES UP!")
             break
-            
 
     movesPlayed += 1
     return bestMove
     
-
+#Creates a list of spaces around the player's and opponent's last moves for which to generate moves around
 def create_moves_list():
     global lastMoves
     listOfSpaces = [[],[]]
     for x in lastMoves:
-        listOfSpaces[0].extend(list(range(x[0]-1, x[0]+1)))
-        listOfSpaces[1].extend(list(range(x[1]-1, x[1]+1)))
-    return listOfSpaces
-
-
+        listOfSpaces[0].extend(list(range(x[0]-2, x[0]+2)))
+        listOfSpaces[1].extend(list(range(x[1]-2, x[1]+2)))
+    listOfValidSpaces = [[x for x in listOfSpaces[0] if x >= 0 and x < boardSize], [x for x in listOfSpaces[1] if x >= 0 and x < boardSize]]
+    return listOfValidSpaces
 
 #Main method 
 def main():
