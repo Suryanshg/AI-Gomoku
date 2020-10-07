@@ -157,10 +157,10 @@ class Game(object):
                 if board[x][y] != None:
 
                     # Are these boundaries computed right??
-                    x_fits_on_board = ( x + self.length_to_win < self.board.width )
-                    y_fits_on_board = ( y + self.length_to_win < self.board.height )
-                    diagf_fits_on_board = ( x + self.length_to_win < self.board.width ) and ( y + self.length_to_win < self.board.height )
-                    diagb_fits_on_board = ( x + self.length_to_win < self.board.width ) and ( y + self.length_to_win > 0 )
+                    x_fits_on_board = ( x + self.length_to_win <= self.board.width )
+                    y_fits_on_board = ( y + self.length_to_win <= self.board.height )
+                    diagf_fits_on_board = ( x + self.length_to_win <= self.board.width ) and ( y + self.length_to_win <= self.board.height )
+                    diagb_fits_on_board = ( x + self.length_to_win <= self.board.width ) and ( y + self.length_to_win >= 0 )
 
                     # Generate lists of pieces on board
                     if x_fits_on_board:
@@ -352,7 +352,7 @@ def play_gomoku(team1, team2):
 
             removeTeamGoFile(up_to_play)
 
-            if move.team_name != up_to_play:
+            if move.team_name != None and move.team_name != up_to_play:
                 # Note: this section may need to be taken with a grain of salt
                 logging.error("Wait your turn!")
                 win_team = up_to_play
