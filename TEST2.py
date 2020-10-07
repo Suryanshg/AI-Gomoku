@@ -5,6 +5,8 @@ import sys
 import random
 from time import sleep
 from eval import evaluate
+import time
+import multiprocessing
 
 #Name of our group, using TEST as a place holder
 groupName = "TEST2"
@@ -12,7 +14,9 @@ groupName = "TEST2"
 # Num moves played by TEST
 movesPlayed = 0
 
+#Variables for storing team turns
 ourTeam = 1
+oppTeam = 2
 
 #Enum for every state a board space can be in
 #    Empty = Space is empty
@@ -33,6 +37,8 @@ board = []
 #Number used for converting chars to ints and vice versa
 charOffset = 97
 
+lastMoves = [[-1,-1],[-1,-1]]
+
 #Fills the board with empty spaces 
 def create_board():
     global board
@@ -50,7 +56,7 @@ def print_board():
 def is_move_valid(x:int, y:int):
     return board[y][x] == SpaceState.EMPTY
 
-# returns if the specified space is actually oon the board
+# returns if the specified space is actually on the board
 def is_space_on_board(x:int, y:int):
    return (x >= 0 and x < boardSize) and (y >= 0 and y < boardSize)
 
@@ -59,12 +65,12 @@ def is_space_on_board(x:int, y:int):
 def place_piece(x:int, y:int, team:int):
     global board
     global movesPlayed
-    if not is_move_valid(x,y) and team == 2 and movesPlayed==0:
-        board[y][x] = SpaceState(team)   
-    elif is_space_on_board(x,y) and is_move_valid(x, y):
+    if is_space_on_board(x,y) and is_move_valid(x, y):
+       # print(str(x)+","+str(y)+"    "+str(board[y][x])+"    "+str(board[x][y]))
         board[y][x] = SpaceState(team)
+        lastMoves[team-1] = [y,x]   
     else:
-        print("INVALID MOVE AT: %i,%i" % (x, y))
+        print("INVALID MOVE AT: %i,%i: FOUND%i" % (x, y, (board[y][x]).value))
     
 #Turns inputted letter into a number corresponding to the boards x coordinate 
 #   i.e: A -> 0
@@ -74,6 +80,7 @@ def letter_to_int(letter):
 
 #Loop that waits for our teams .go file to appear in the current directory
 def wait_for_go_file():
+    sleep(.5)
     exists = path.exists(groupName + ".go")
     while(not exists):
         exists = path.exists(groupName + ".go")
@@ -94,8 +101,8 @@ def delete_go_file():
 #Parses through the move file and places a piece in the corresponding space on the board
 def parse_move_file():
     global ourTeam
+    global oppTeam
     global board
-    oppTeam = 2
     exists = path.exists('move_file')
     while(not exists):
         exists = path.exists('move_file')
@@ -103,27 +110,28 @@ def parse_move_file():
         fileRead = file.read().replace('\n', '')
     if(len(fileRead)>0): # There exists a move already
         move = fileRead.split()
-        
-        oppTeam = 2
-        if move[0] != groupName:
-            ourTeam = 2
-            oppTeam = 1
-
         place_piece(letter_to_int(move[1]), int(move[2])-1,oppTeam)
+        #print_board()
     # else: # No move already exists (our program is Player 1)
     if movesPlayed == 0:  
         generate_and_place_random(ourTeam)
     else:
         bestMove = find_best_move(board, ourTeam, oppTeam, MAXDEPTH)
-        x = int_to_letter(bestMove[1])
-        y = bestMove[0] + 1
+        if bestMove != [-1,-1]:
+            x = int_to_letter(bestMove[0])
+            y = bestMove[1] + 1
+            place_piece(bestMove[0],bestMove[1], ourTeam)
 
-        with open('move_file','w') as mf: # Writing the move back to file
-            mf.write(groupName+" "+x+" "+str(y))
-        print(groupName+" "+x+" "+str(y))
-        print_board()
-        delete_go_file()
-        wait_for_go_file()
+            with open('move_file','w') as mf: # Writing the move back to file
+                mf.write(groupName+" "+x+" "+str(y))
+            #print(groupName+" "+x+" "+str(y))
+            #print_board()
+            delete_go_file()
+            #print(board)
+            wait_for_go_file()
+        else:
+            generate_and_place_random(ourTeam)
+
         
 
 #Generates a random move and places
@@ -142,7 +150,7 @@ def generate_and_place_random(ourTeam):
     with open('move_file','w') as mf: # Writing the move back to file
         mf.write(groupName+" "+x+" "+str(y))
     
-    print_board()
+    #print_board()
     delete_go_file()
     wait_for_go_file()
 
@@ -160,7 +168,7 @@ INF = float('inf')
 FIVEROWPOS = 100000
 FIVEROWNEG = -100000
 
-def min_max_alpha_beta(board, team, otherTeam, depth, maxDepth, isMax, alpha, beta):
+def min_max_alpha_beta(board, team, otherTeam, depth, maxDepth, isMax, alpha, beta,moveSpots):
     bestScore = evaluate(board, team, otherTeam)
 
     if bestScore >= FIVEROWPOS or bestScore <= FIVEROWNEG or depth >= maxDepth:
@@ -172,13 +180,13 @@ def min_max_alpha_beta(board, team, otherTeam, depth, maxDepth, isMax, alpha, be
 
     if isMax:
         best = -INF
-        for x in range(boardSize):
-            for y in range(boardSize):
-                if board[x][y] == SpaceState.EMPTY:
-                    board[x][y] = SpaceState(team)
-                    best = max(best,min_max_alpha_beta(board,otherTeam,team,depth+1,maxDepth,not isMax,alpha,beta))
+        for x in moveSpots[1]:
+            for y in moveSpots[0]:
+                if (is_space_on_board(x,y) and is_move_valid(x,y)):
+                    board[y][x] = SpaceState(team)
+                    best = max(best,min_max_alpha_beta(board,otherTeam,team,depth+1,maxDepth,not isMax,alpha,beta,moveSpots))
                     alpha = max(alpha, best)
-                    board[x][y] = SpaceState.EMPTY
+                    board[y][x] = SpaceState.EMPTY
                     if beta <= alpha:
                         break
             if beta <= alpha:
@@ -186,37 +194,72 @@ def min_max_alpha_beta(board, team, otherTeam, depth, maxDepth, isMax, alpha, be
         return best                
     else:        
         best = INF
-        for x in range(boardSize):
-            for y in range(boardSize):
-                if board[x][y] == SpaceState.EMPTY:
-                    board[x][y] = SpaceState(team)
-                    best = min(best,min_max_alpha_beta(board,otherTeam,team,depth+1,maxDepth,not isMax,alpha,beta))
+        for x in moveSpots[1]:
+            for y in moveSpots[0]:
+                if (is_space_on_board(x,y) and is_move_valid(x,y)):
+                    board[y][x] = SpaceState(team)
+                    best = min(best,min_max_alpha_beta(board,otherTeam,team,depth+1,maxDepth,not isMax,alpha,beta,moveSpots))
                     beta = min(beta, best)
-                    board[x][y] = SpaceState.EMPTY
+                    board[y][x] = SpaceState.EMPTY
                     if beta <= alpha:
                         break
             if beta <= alpha:
                 break
         return best   
 
+def create_moves_list():
+    global lastMoves
+    listOfSpaces = [[],[]]
+    for x in lastMoves:
+        listOfSpaces[0].extend(list(range(x[0]-1, x[0]+1)))
+        listOfSpaces[1].extend(list(range(x[1]-1, x[1]+1)))
+    return listOfSpaces
+
+TIMEOUTAMOUNT = 5
+
+bestVal = -INF
+bestMove = [-1,-1] 
+moveSpots = create_moves_list()
+
+def helper():
+    print("IN HELPER")
+    global bestVal
+    global bestMove
+    global moveSpots
+    for x in moveSpots[1]:
+        for y in moveSpots[0]:
+            if (is_space_on_board(x,y) and is_move_valid(x,y)):
+                board[y][x] = SpaceState(team)
+                moveVal = min_max_alpha_beta(board,team,otherTeam,0,maxDepth,False,-INF,INF,moveSpots)
+                board[y][x] = SpaceState.EMPTY
+
+                if moveVal > bestVal:
+                    bestMove[0] = x
+                    bestMove[1] = y
+                    bestVal = moveVal
+
+
 def find_best_move(board, team, otherTeam, maxDepth):
     global movesPlayed
+    global bestVal
+    global bestMove
+    global moveSpots
     bestVal = -INF
-    bestMove = [-1,-1]
-    for x in range(boardSize):
-            for y in range(boardSize):
-                if board[x][y] == SpaceState.EMPTY:
-                    board[x][y] = SpaceState(team)
-                    moveVal = min_max_alpha_beta(board,team,otherTeam,0,maxDepth,False,-INF,INF)
-                    board[x][y] = SpaceState.EMPTY
+    bestMove = [-1,-1] 
+    moveSpots = create_moves_list()
+    #print(moveSpots)
 
-                    if moveVal > bestVal:
-                        bestMove[0] = x
-                        bestMove[1] = y
-                        bestVal = moveVal
+    p = multiprocessing.Process(target=helper, name="Helper")
+    p.start()
+    time.sleep(TIMEOUTAMOUNT)
+    if p.is_alive():
+        p.terminate()
+        p.join()
+
     movesPlayed += 1
     return bestMove
-    
+
+
 #Main method 
 def main():
     create_board()
